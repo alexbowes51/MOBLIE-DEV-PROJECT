@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "rlgl.h"
 #include <xstring>
 
 using namespace std;
@@ -24,7 +25,7 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "PIXIL DRAW");
 
     //Variables
-    Vector2 cellSize{ 20,20 };
+    Vector2 cellSize{ CELL_SIZE,CELL_SIZE };
   
     Color CurrentColor = BLACK;
     Color DefaultColor1 = WHITE;
@@ -36,7 +37,6 @@ int main(void)
     int selectedColor = 0;
 
     Cell grid[GRID_WIDTH][GRID_HEIGHT];
-
     for (int x = 0;x < GRID_WIDTH; x++) {
         for (int y = 0; y < GRID_HEIGHT;y++) {
             grid[x][y].position.x = x * cellSize.x;
@@ -44,6 +44,14 @@ int main(void)
             grid[x][y].color = ((x + y) % 2 == 0) ? DefaultColor1 : DefaultColor2;
         }
     }
+
+ //RENDER TEXTURE FOR GRID TO BE EXPORTED
+    RenderTexture ImageTexture = LoadRenderTexture(screenWidth, screenHeight - 200);
+
+    Rectangle ScrRect = { 0,0,(float)ImageTexture.texture.width,(float)ImageTexture.texture.height};
+    Vector2 Scrposition = { 0, 0 };
+
+   
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -68,12 +76,16 @@ int main(void)
         if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_E)) {
             Action = 2;
         }
+        
 
         
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             Vector2 mousePosition = GetMousePosition();
-            int gX = mousePosition.x / CELL_SIZE;
-            int gY = mousePosition.y / CELL_SIZE;
+            mousePosition.x -= Scrposition.x;
+            mousePosition.y -= Scrposition.y;
+
+            int gX = (int)(mousePosition.x / CELL_SIZE);
+            int gY = (int)(mousePosition.y  / CELL_SIZE);
 
             //CHECKS FOR COLLSIONS WITH GRID
             if (gX >= 0 && gX < GRID_WIDTH && gY >= 0 && gY < GRID_HEIGHT) {
@@ -95,24 +107,36 @@ int main(void)
                 }
             }
 
+            //BUTTONS 
             Rectangle drawButton = { 600,screenHeight - 150,100,40 };
             Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
-            if (CheckCollisionPointRec(mousePosition, drawButton)) Action = 1;
-            if (CheckCollisionPointRec(mousePosition, eraseButton)) Action = 2;
-            
+            //COLLISIONS FOR BUTTONS
+            if (CheckCollisionPointRec(mousePosition, drawButton)) {
+                Action = 1;
+            }
+            if (CheckCollisionPointRec(mousePosition, eraseButton)) {
+                Action = 2;
+            }
         }
+
+        BeginTextureMode(ImageTexture);
+        ClearBackground(RAYWHITE);
+
+        for (int x = 0;x < GRID_WIDTH;x++) {
+            for (int y = 0;y < GRID_HEIGHT;y++) {
+                DrawRectangleV(grid[x][y].position, cellSize, grid[x][y].color);
+                DrawRectangleLines(grid[x][y].position.x, grid[x][y].position.y, CELL_SIZE, CELL_SIZE, ColorAlpha(BLACK, 0));
+            }
+        }
+
+        EndTextureMode();
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        for (int x = 0; x < GRID_WIDTH;x++) {
-            for (int y = 0;y < GRID_HEIGHT;y++) {
-                DrawRectangleV(grid[x][y].position, cellSize, grid[x][y].color);
-
-                DrawRectangleLines(grid[x][y].position.x, grid[x][y].position.y, CELL_SIZE, CELL_SIZE,ColorAlpha(BLACK,0));
-            }
-        }
+       
+        DrawTextureRec(ImageTexture.texture,ScrRect,Scrposition, WHITE);
 
         DrawRectangle(0, screenHeight - 200, 1000, 200, DARKPURPLE);
         for (int i = 0;i < paletteSize;i++) {
@@ -130,6 +154,12 @@ int main(void)
         DrawText("Draw", drawButton.x + 20, drawButton.y + 10, 20, BLACK);
         DrawText("Erase", eraseButton.x + 20, eraseButton.y + 10, 20, BLACK);
 
+
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_S)) {
+            Image gridImage = LoadImageFromTexture(ImageTexture.texture);
+            ExportImage(gridImage, "pixel_grid_image.png");
+            UnloadImage(gridImage);
+        }
 
         EndDrawing();
         //----------------------------------------------------------------------------------

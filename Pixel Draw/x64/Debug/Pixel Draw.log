@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(72,42): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(72,42): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+  Pixel Draw.vcxproj -> C:\Users\alexb\Desktop\Noels Project\Pixel Draw\x64\Debug\Pixel Draw.exe

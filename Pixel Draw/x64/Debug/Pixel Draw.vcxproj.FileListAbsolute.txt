@@ -1,0 +1,3 @@
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\x64\Debug\raylib.dll
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\x64\Debug\glfw3.dll
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\Pixel Draw\x64\Debug\Pixel Dr.41B1756D.Up2Date

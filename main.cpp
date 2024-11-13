@@ -1,4 +1,7 @@
 #include "raylib.h"
+#include <xstring>
+
+using namespace std;
 
 #define GRID_WIDTH 50 
 #define GRID_HEIGHT 40
@@ -26,7 +29,7 @@ int main(void)
     Color CurrentColor = BLACK;
     Color DefaultColor1 = WHITE;
     Color DefaultColor2 = LIGHTGRAY;
-    bool Drawing = false;
+    int Action = 0;
 
     Color Palette[] = { BLACK,WHITE,RED,GREEN,BLUE,YELLOW,ORANGE,PURPLE,DARKBLUE,DARKGREEN };
     int paletteSize = sizeof(Palette) / sizeof(Palette[0]);
@@ -57,16 +60,45 @@ int main(void)
             selectedColor = (selectedColor - 1 + paletteSize) % paletteSize;
             CurrentColor = Palette[selectedColor];
         }
+
+        //CONTROL KEYS
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_P)) {
+            Action = 1;
+        }
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_E)) {
+            Action = 2;
+        }
+
         
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             Vector2 mousePosition = GetMousePosition();
             int gX = mousePosition.x / CELL_SIZE;
             int gY = mousePosition.y / CELL_SIZE;
 
+            //CHECKS FOR COLLSIONS WITH GRID
             if (gX >= 0 && gX < GRID_WIDTH && gY >= 0 && gY < GRID_HEIGHT) {
-                grid[gX][gY].color = CurrentColor;
+                if (Action == 1) {
+                    grid[gX][gY].color = CurrentColor;
+                }
+                else if(Action == 2)
+                {
+                    grid[gX][gY].color = ((gX + gY) % 2 == 0) ? DefaultColor1 : DefaultColor2;
+                }
             }
-              
+            
+            //CHECKS FOR COLLISIONS WITH COLOUR BUTTONS
+            for (int i = 0; i < paletteSize; i++) {
+                Rectangle colorButton = { 10 + 40 * i,screenHeight - 100,30,30 };
+                if (CheckCollisionPointRec(mousePosition, colorButton)) {
+                    selectedColor = i;
+                    CurrentColor = Palette[selectedColor];
+                }
+            }
+
+            Rectangle drawButton = { 600,screenHeight - 150,100,40 };
+            Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
+            if (CheckCollisionPointRec(mousePosition, drawButton)) Action = 1;
+            if (CheckCollisionPointRec(mousePosition, eraseButton)) Action = 2;
             
         }
 
@@ -90,6 +122,14 @@ int main(void)
                 DrawRectangleLinesEx(colorButton, 2, BLACK);
             }
         }
+
+        Rectangle drawButton = { 600,screenHeight - 150,100,40 };
+        Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
+        DrawRectangleRec(drawButton, (Action == 1) ? GREEN : DARKGRAY);
+        DrawRectangleRec(eraseButton, (Action == 2) ? RED : DARKGRAY);
+        DrawText("Draw", drawButton.x + 20, drawButton.y + 10, 20, BLACK);
+        DrawText("Erase", eraseButton.x + 20, eraseButton.y + 10, 20, BLACK);
+
 
         EndDrawing();
         //----------------------------------------------------------------------------------

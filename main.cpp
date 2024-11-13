@@ -1,15 +1,16 @@
 #include "raylib.h"
 
-#define MAX_CELLS 1000
+#define GRID_WIDTH 50 
+#define GRID_HEIGHT 40
+#define CELL_SIZE 20 
 
 
 
 typedef struct Cell {
     Vector2 position;
-    float width;
-    float height;
     Color color;
 }Cell;
+
 
 int main(void)
 {
@@ -20,17 +21,26 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "PIXIL DRAW");
 
     //Variables
-    Cell cells[MAX_CELLS];
-    int CellCount = 0;
+    Vector2 cellSize{ 20,20 };
+  
     Color CurrentColor = BLACK;
     Color DefaultColor1 = WHITE;
-    Color DefaultColor2 = GRAY;
-    Vector2 CellStart = { 0 };
+    Color DefaultColor2 = LIGHTGRAY;
     bool Drawing = false;
 
     Color Palette[] = { BLACK,WHITE,RED,GREEN,BLUE,YELLOW,ORANGE,PURPLE,DARKBLUE,DARKGREEN };
     int paletteSize = sizeof(Palette) / sizeof(Palette[0]);
     int selectedColor = 0;
+
+    Cell grid[GRID_WIDTH][GRID_HEIGHT];
+
+    for (int x = 0;x < GRID_WIDTH; x++) {
+        for (int y = 0; y < GRID_HEIGHT;y++) {
+            grid[x][y].position.x = x * cellSize.x;
+            grid[x][y].position.y = y * cellSize.y;
+            grid[x][y].color = ((x + y) % 2 == 0) ? DefaultColor1 : DefaultColor2;
+        }
+    }
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -49,25 +59,28 @@ int main(void)
         }
         
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            CellStart = GetMousePosition();
-            if (CellCount < MAX_CELLS) {
-                Vector2 CellEnd = GetMousePosition();
+            Vector2 mousePosition = GetMousePosition();
+            int gX = mousePosition.x / CELL_SIZE;
+            int gY = mousePosition.y / CELL_SIZE;
 
-                cells[CellCount].position.x = CellStart.x;
-                cells[CellCount].position.y = CellStart.y;
-                cells[CellCount].width = 10;
-                cells[CellCount].height = 10;
-                CellCount++;
-
-                cells[CellCount].color = CurrentColor;
-              
+            if (gX >= 0 && gX < GRID_WIDTH && gY >= 0 && gY < GRID_HEIGHT) {
+                grid[gX][gY].color = CurrentColor;
             }
+              
+            
         }
 
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
         ClearBackground(RAYWHITE);
+        for (int x = 0; x < GRID_WIDTH;x++) {
+            for (int y = 0;y < GRID_HEIGHT;y++) {
+                DrawRectangleV(grid[x][y].position, cellSize, grid[x][y].color);
+
+                DrawRectangleLines(grid[x][y].position.x, grid[x][y].position.y, CELL_SIZE, CELL_SIZE,ColorAlpha(BLACK,0));
+            }
+        }
 
         DrawRectangle(0, screenHeight - 200, 1000, 200, DARKPURPLE);
         for (int i = 0;i < paletteSize;i++) {
@@ -76,11 +89,6 @@ int main(void)
             if (i == selectedColor) {
                 DrawRectangleLinesEx(colorButton, 2, BLACK);
             }
-        }
-
-        for (int i = 0; i < CellCount;i++) {
-            DrawRectangleRec({ cells[i].position.x,cells[i].position.y,
-                              cells[i].width,cells[i].height }, cells[i].color);
         }
 
         EndDrawing();

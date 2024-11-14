@@ -8,12 +8,18 @@ using namespace std;
 #define GRID_HEIGHT 40
 #define CELL_SIZE 20 
 
-
-
 typedef struct Cell {
     Vector2 position;
     Color color;
 }Cell;
+
+
+//Save Function
+void SaveGridImage(RenderTexture2D ImageTexture) {
+    Image gridImage = LoadImageFromTexture(ImageTexture.texture);
+    ExportImage(gridImage, "pixel_grid_image.png");
+    UnloadImage(gridImage);
+}
 
 
 int main(void)
@@ -48,7 +54,8 @@ int main(void)
  //RENDER TEXTURE FOR GRID TO BE EXPORTED
     RenderTexture ImageTexture = LoadRenderTexture(screenWidth, screenHeight - 200);
 
-    Rectangle ScrRect = { 0,0,(float)ImageTexture.texture.width,(float)ImageTexture.texture.height};
+    //Textures size + position                                  //if not minus its inverted 
+    Rectangle ScrRect = { 0,0,(float)ImageTexture.texture.width,-(float)ImageTexture.texture.height};
     Vector2 Scrposition = { 0, 0 };
 
    
@@ -75,6 +82,9 @@ int main(void)
         }
         if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_E)) {
             Action = 2;
+        }
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_S)) {
+            SaveGridImage(ImageTexture);
         }
         
 
@@ -110,12 +120,16 @@ int main(void)
             //BUTTONS 
             Rectangle drawButton = { 600,screenHeight - 150,100,40 };
             Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
+            Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
             //COLLISIONS FOR BUTTONS
             if (CheckCollisionPointRec(mousePosition, drawButton)) {
                 Action = 1;
             }
             if (CheckCollisionPointRec(mousePosition, eraseButton)) {
                 Action = 2;
+            }
+            if (CheckCollisionPointRec(mousePosition, SaveButton)) {
+                SaveGridImage(ImageTexture);
             }
         }
 
@@ -147,19 +161,20 @@ int main(void)
             }
         }
 
+        //drawing the buttons 
         Rectangle drawButton = { 600,screenHeight - 150,100,40 };
         Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
-        DrawRectangleRec(drawButton, (Action == 1) ? GREEN : DARKGRAY);
-        DrawRectangleRec(eraseButton, (Action == 2) ? RED : DARKGRAY);
+        Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
+
+        //buttons Colors
+        DrawRectangleRec(drawButton, (Action == 1) ? DARKGRAY : GREEN);
+        DrawRectangleRec(eraseButton, (Action == 2) ? DARKGRAY : GREEN);
+        DrawRectangleRec(SaveButton, BLUE);
+
+        //drawing the text 
         DrawText("Draw", drawButton.x + 20, drawButton.y + 10, 20, BLACK);
         DrawText("Erase", eraseButton.x + 20, eraseButton.y + 10, 20, BLACK);
-
-
-        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_S)) {
-            Image gridImage = LoadImageFromTexture(ImageTexture.texture);
-            ExportImage(gridImage, "pixel_grid_image.png");
-            UnloadImage(gridImage);
-        }
+        DrawText("Save", SaveButton.x + 20, SaveButton.y + 10, 20, BLACK);
 
         EndDrawing();
         //----------------------------------------------------------------------------------

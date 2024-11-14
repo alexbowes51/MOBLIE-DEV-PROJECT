@@ -30,18 +30,20 @@ int main(void)
     const int screenHeight = 900;
     InitWindow(screenWidth, screenHeight, "PIXIL DRAW");
 
-    //Variables
+    //Variables-----------------------------------------------------------------------------
     Vector2 cellSize{ CELL_SIZE,CELL_SIZE };
   
     Color CurrentColor = BLACK;
     Color DefaultColor1 = WHITE;
     Color DefaultColor2 = LIGHTGRAY;
-    int Action = 0;
-
-    Color Palette[] = { BLACK,WHITE,RED,GREEN,BLUE,YELLOW,ORANGE,PURPLE,DARKBLUE,DARKGREEN };
+    int Action = 3;
+    
+    //Color palette varibales
+    Color Palette[] = { BLACK,WHITE,RED,GREEN,BLUE,YELLOW,ORANGE,PURPLE,DARKBLUE,DARKGREEN};
     int paletteSize = sizeof(Palette) / sizeof(Palette[0]);
     int selectedColor = 0;
 
+    //Grid initialization
     Cell grid[GRID_WIDTH][GRID_HEIGHT];
     for (int x = 0;x < GRID_WIDTH; x++) {
         for (int y = 0; y < GRID_HEIGHT;y++) {
@@ -51,12 +53,25 @@ int main(void)
         }
     }
 
+    //Selection Tool 
+    bool Selecting = false;
+    Vector2 SelectStart{}, SelectEnd{};
+    Color SelectionBuffer[GRID_WIDTH][GRID_HEIGHT];
+    bool BeenSelected = false;
+
+    int startX = (int)SelectStart.x;
+    int startY = (int)SelectStart.y;
+    int endX = (int)SelectEnd.x;
+    int endY = (int)SelectEnd.y;
+
+   //----------------------------------------------------------------------------------------
+
  //RENDER TEXTURE FOR GRID TO BE EXPORTED
     RenderTexture ImageTexture = LoadRenderTexture(screenWidth, screenHeight - 200);
 
-    //Textures size + position                                  //if not minus its inverted 
+ //Textures size + position                                  //if not minus its inverted 
     Rectangle ScrRect = { 0,0,(float)ImageTexture.texture.width,-(float)ImageTexture.texture.height};
-    Vector2 Scrposition = { 0, 0 };
+    Vector2 Scrposition = { 0,0 };
 
    
 
@@ -87,8 +102,7 @@ int main(void)
             SaveGridImage(ImageTexture);
         }
         
-
-        
+        //Drawing Mechanic
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             Vector2 mousePosition = GetMousePosition();
             mousePosition.x -= Scrposition.x;
@@ -121,6 +135,7 @@ int main(void)
             Rectangle drawButton = { 600,screenHeight - 150,100,40 };
             Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
             Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
+            Rectangle SelectionButton = { 850,screenHeight - 150,100,40 };
             //COLLISIONS FOR BUTTONS
             if (CheckCollisionPointRec(mousePosition, drawButton)) {
                 Action = 1;
@@ -131,8 +146,62 @@ int main(void)
             if (CheckCollisionPointRec(mousePosition, SaveButton)) {
                 SaveGridImage(ImageTexture);
             }
+            if (CheckCollisionPointRec(mousePosition, SelectionButton)) {
+                Action = 3;
+            }
+            
+
+            //SELECTION
+            if (Action == 3) {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    if (!Selecting) {
+                        Selecting = true;
+                        BeenSelected = false;
+                        SelectStart.x = (int)(mousePosition.x / CELL_SIZE);
+                        SelectStart.y = (int)(mousePosition.y / CELL_SIZE);
+                    }
+                    else {
+                        Selecting = false;
+                        SelectEnd = mousePosition;
+
+                        SelectEnd.x = (int)(mousePosition.x / CELL_SIZE);
+                        SelectEnd.y = (int)(mousePosition.y / CELL_SIZE);
+
+                        BeenSelected = true;
+                        startX = min((int)SelectStart.x, (int)SelectEnd.x);
+                        startY = min((int)SelectStart.y, (int)SelectEnd.y);
+                        endX = max((int)SelectStart.x, (int)SelectEnd.x);
+                        endY = max((int)SelectStart.y, (int)SelectEnd.y);
+
+                        //COPY THE SELECTED AREA
+                        for (int x = startX; x <= endX; x++) {
+                            for (int y = startY; y <= endY; y++) {
+                                SelectionBuffer[x - startX][y - startY] = grid[x][y].color;
+                            }
+                        }
+                    }
+                }
+
+
+                if (BeenSelected && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+                    Vector2 PastePos = GetMousePosition();
+                    int pasteX = (int)(PastePos.x / CELL_SIZE);
+                    int pasteY = (int)(PastePos.y / CELL_SIZE);
+
+                    for (int x = 0; x <= endX - startX; x++) {
+                        for (int y = 0; y <= endY - startY; y++) {
+                            int gX = pasteX + x;
+                            int gY = pasteY + y;
+                            if (gX >= 0 && gX < GRID_WIDTH && gY >= 0 && gY < GRID_HEIGHT) {
+                                grid[gX][gY].color = SelectionBuffer[x][y];
+                            }
+                        }
+                    }
+                }
+            }
         }
 
+        //TEXTURE
         BeginTextureMode(ImageTexture);
         ClearBackground(RAYWHITE);
 
@@ -165,16 +234,28 @@ int main(void)
         Rectangle drawButton = { 600,screenHeight - 150,100,40 };
         Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
         Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
+        Rectangle SelectionButton = { 850,screenHeight - 150,100,40 };
 
         //buttons Colors
         DrawRectangleRec(drawButton, (Action == 1) ? DARKGRAY : GREEN);
-        DrawRectangleRec(eraseButton, (Action == 2) ? DARKGRAY : GREEN);
+        DrawRectangleRec(eraseButton, (Action == 2) ? DARKGRAY : GREEN); 
+        DrawRectangleRec(SelectionButton, (Action == 3) ? DARKGRAY : GREEN);
         DrawRectangleRec(SaveButton, BLUE);
-
+       
         //drawing the text 
         DrawText("Draw", drawButton.x + 20, drawButton.y + 10, 20, BLACK);
         DrawText("Erase", eraseButton.x + 20, eraseButton.y + 10, 20, BLACK);
         DrawText("Save", SaveButton.x + 20, SaveButton.y + 10, 20, BLACK);
+        DrawText("Selection", SelectionButton.x + 20, SelectionButton.y + 10, 20, BLACK);
+
+        //Drawing Selecting
+        if (Action == 3 && Selecting) {
+            Vector2 MousePos = GetMousePosition();
+            int selWidth = (int)(MousePos.x - SelectStart.x * CELL_SIZE);
+            int selHeight = (int)(MousePos.y - SelectStart.y * CELL_SIZE);
+            DrawRectangleLines(SelectStart.x* CELL_SIZE, SelectStart.y* CELL_SIZE, selWidth, selHeight, GREEN);
+        }
+
 
         EndDrawing();
         //----------------------------------------------------------------------------------

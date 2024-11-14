@@ -1,10 +1,10 @@
 ﻿  main.cpp
-C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(128,46): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
-C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(128,46): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(127,46): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(127,46): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(160,46): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(161,46): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(162,46): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(167,44): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(168,44): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(169,44): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(211,78): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
 C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(211,55): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
 C:\Users\alexb\Desktop\Noels Project\Pixel Draw\main.cpp(226,42): warning C4838: conversion from 'int' to 'float' requires a narrowing conversion

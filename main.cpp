@@ -180,10 +180,12 @@ int main(void)
                             }
                         }
                     }
-                }
+                }  
+            }  
+        } 
 
-
-                if (BeenSelected && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        //Paste the copied area 
+        if (BeenSelected && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
                     Vector2 PastePos = GetMousePosition();
                     int pasteX = (int)(PastePos.x / CELL_SIZE);
                     int pasteY = (int)(PastePos.y / CELL_SIZE);
@@ -197,8 +199,6 @@ int main(void)
                             }
                         }
                     }
-                }
-            }
         }
 
         //TEXTURE

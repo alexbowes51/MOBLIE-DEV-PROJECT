@@ -66,7 +66,14 @@ int main(void)
     int endX = (int)SelectEnd.x;
     int endY = (int)SelectEnd.y;
 
+    //Controll Menu
     bool showMessageBox = false;
+
+    //Rectangle Drawing 
+    Vector2 RectStart = { 0,0 };
+    Vector2 RectEnd = { 0,0 };
+    bool DrawingRect = false;
+
         
    //----------------------------------------------------------------------------------------
 
@@ -140,6 +147,9 @@ int main(void)
             Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
             Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
             Rectangle SelectionButton = { 850,screenHeight - 150,100,40 };
+            Rectangle RectangleButton = { 600,screenHeight - 100,100,40 };
+
+            
 
             //COLLISIONS FOR BUTTONS
             if (CheckCollisionPointRec(mousePosition, drawButton)) {
@@ -153,6 +163,9 @@ int main(void)
             }
             if (CheckCollisionPointRec(mousePosition, SelectionButton)) {
                 Action = 3;
+            }
+            if (CheckCollisionPointRec(mousePosition, RectangleButton)) {
+                Action = 4;
             }
             
 
@@ -206,6 +219,39 @@ int main(void)
                     }
         }
 
+
+
+        //RECTANGLE 
+        if (Action == 4) {
+            Vector2 mousePosition = GetMousePosition();
+
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                
+                RectStart.x = (int)(mousePosition.x / CELL_SIZE);
+                RectStart.y = (int)(mousePosition.y / CELL_SIZE);
+                DrawingRect = true;
+            }
+
+            if (DrawingRect && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+                RectEnd.x = (int)(mousePosition.x / CELL_SIZE);
+                RectEnd.y = (int)(mousePosition.y / CELL_SIZE);
+            }
+
+            if (DrawingRect && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+                DrawingRect = false;
+                int StartX = min((int)RectStart.x, (int)RectEnd.x);
+                int StartY = min((int)RectStart.y, (int)RectEnd.y);
+                int EndX = max((int)RectStart.x, (int)RectEnd.x);
+                int EndY = max((int)RectStart.y, (int)RectEnd.y);
+
+                for (int x = StartX; x <= EndX;x++) {
+                    for (int y = StartY; y <= EndY;y++) {
+                        grid[x][y].color = CurrentColor;
+                    }
+                }
+            }
+        }
+
         //TEXTURE
         BeginTextureMode(ImageTexture);
         ClearBackground(RAYWHITE);
@@ -226,9 +272,7 @@ int main(void)
        
         DrawTextureRec(ImageTexture.texture,ScrRect,Scrposition, WHITE);
 
-
-
-
+        //Tool Bar 
         DrawRectangle(0, screenHeight - 200, 1000, 200, DARKPURPLE);
         for (int i = 0;i < paletteSize;i++) {
             Rectangle colorButton = { 10 + 40 * i, screenHeight - 100, 30,30 };
@@ -237,40 +281,54 @@ int main(void)
                 DrawRectangleLinesEx(colorButton, 2, BLACK);
             }
         }
-
         //drawing the buttons 
         Rectangle drawButton = { 600,screenHeight - 150,100,40 };
         Rectangle eraseButton = { 725,screenHeight - 150,100,40 };
         Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
         Rectangle SelectionButton = { 850,screenHeight - 150,100,40 };
+        Rectangle RectangleButton = { 600,screenHeight - 100,100,40 };
 
         //buttons Colors
         DrawRectangleRec(drawButton, (Action == 1) ? DARKGRAY : GREEN);
         DrawRectangleRec(eraseButton, (Action == 2) ? DARKGRAY : GREEN); 
         DrawRectangleRec(SelectionButton, (Action == 3) ? DARKGRAY : GREEN);
+        DrawRectangleRec(RectangleButton, (Action == 4) ? DARKGRAY : GREEN);
         DrawRectangleRec(SaveButton, BLUE);
        
         //drawing the text 
         DrawText("Draw", drawButton.x + 20, drawButton.y + 10, 20, BLACK);
         DrawText("Erase", eraseButton.x + 20, eraseButton.y + 10, 20, BLACK);
         DrawText("Save", SaveButton.x + 20, SaveButton.y + 10, 20, BLACK);
-        DrawText("Selection", SelectionButton.x + 20, SelectionButton.y + 10, 20, BLACK);
+        DrawText("Selection", SelectionButton.x + 5, SelectionButton.y + 10, 20, BLACK);
+        DrawText("Rectangle", RectangleButton.x, RectangleButton.y + 10, 20, BLACK);
 
         //Drawing Selecting
         if (Action == 3 && Selecting) {
             Vector2 MousePos = GetMousePosition();
             int selWidth = (int)(MousePos.x - SelectStart.x * CELL_SIZE);
             int selHeight = (int)(MousePos.y - SelectStart.y * CELL_SIZE);
-            DrawRectangleLines(SelectStart.x* CELL_SIZE, SelectStart.y* CELL_SIZE, selWidth, selHeight, GREEN);
+            DrawRectangleLines(SelectStart.x * CELL_SIZE, SelectStart.y * CELL_SIZE, selWidth, selHeight, GREEN);
         }
 
+        //Drawing Preview of Rectangle
+        if (Action == 4 && DrawingRect) {
+            Vector2 mousePosition = GetMousePosition();
+            int StartX = min((int)RectStart.x, (int)RectEnd.x);
+            int StartY = min((int)RectStart.y, (int)RectEnd.y);
+            int EndX = max((int)RectStart.x, (int)RectEnd.x);
+            int EndY = max((int)RectStart.y, (int)RectEnd.y);
 
-        if (GuiButton({ 24, 24, 120, 30 }, "#191#Show Message")) showMessageBox = true;
+            DrawRectangle(StartX * CELL_SIZE, StartY * CELL_SIZE,
+                EndX * CELL_SIZE, EndY * CELL_SIZE ,ColorAlpha(DARKGRAY,0.2));
+        }
 
+        //Controlls Message 
+        if (GuiButton({ 24, 700, 120, 50 }, "#191#CONTROLLS")) showMessageBox = true;
         if (showMessageBox)
         {
-            int result = GuiMessageBox({ 85, 70, 250, 100 },
-                "#191#Message Box", "Hi! This is a message!", "Nice;Cool");
+            int result = GuiMessageBox({ 24, 550, 250, 150 },
+                "#191#CONTROLLS","\n" "CTRL + S = SAVE\n" "CTRL + E = ERASE\n" "CTRL + P = DRAW\n", 
+                "Nice;Cool");
 
             if (result >= 0) showMessageBox = false;
         }

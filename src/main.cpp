@@ -15,10 +15,10 @@ typedef struct Cell {
     Color color;
 }Cell;
 
-
 //Save Function
 void SaveGridImage(RenderTexture2D ImageTexture) {
     Image gridImage = LoadImageFromTexture(ImageTexture.texture);
+    ImageFlipVertical(&gridImage);
     ExportImage(gridImage, "pixel_grid_image.png");
     UnloadImage(gridImage);
 }
@@ -70,8 +70,8 @@ int main(void)
     bool showMessageBox = false;
 
     //Rectangle Drawing 
-    Vector2 RectStart = { 0,0 };
-    Vector2 RectEnd = { 0,0 };
+    Vector2 RectStart = { -10,-10 };
+    Vector2 RectEnd = { -10,-10 };
     bool DrawingRect = false;
 
         
@@ -110,6 +110,7 @@ int main(void)
             Action = 2;
         }
         if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_S)) {
+           
             SaveGridImage(ImageTexture);
         }
         
@@ -160,6 +161,7 @@ int main(void)
             }
             if (CheckCollisionPointRec(mousePosition, SaveButton)) {
                 SaveGridImage(ImageTexture);
+                
             }
             if (CheckCollisionPointRec(mousePosition, SelectionButton)) {
                 Action = 3;
@@ -300,7 +302,7 @@ int main(void)
         DrawText("Erase", eraseButton.x + 20, eraseButton.y + 10, 20, BLACK);
         DrawText("Save", SaveButton.x + 20, SaveButton.y + 10, 20, BLACK);
         DrawText("Selection", SelectionButton.x + 5, SelectionButton.y + 10, 20, BLACK);
-        DrawText("Rectangle", RectangleButton.x, RectangleButton.y + 10, 20, BLACK);
+        DrawText("Rectangle", RectangleButton.x + 10, RectangleButton.y + 10, 15, BLACK);
 
         //Drawing Selecting
         if (Action == 3 && Selecting) {
@@ -318,8 +320,13 @@ int main(void)
             int EndX = max((int)RectStart.x, (int)RectEnd.x);
             int EndY = max((int)RectStart.y, (int)RectEnd.y);
 
-            DrawRectangle(StartX * CELL_SIZE, StartY * CELL_SIZE,
-                EndX * CELL_SIZE, EndY * CELL_SIZE ,ColorAlpha(DARKGRAY,0.2));
+            //Converting the preiw cord to grid ??
+            int RectX = StartX * CELL_SIZE;
+            int RectY = StartY * CELL_SIZE;
+            int RectW = (EndX - StartX + 1) * CELL_SIZE;
+            int RectH = (EndY - StartY + 1) * CELL_SIZE;
+
+            DrawRectangle(RectX,RectY,RectW,RectH,ColorAlpha(CurrentColor,0.3));
         }
 
         //Controlls Message 

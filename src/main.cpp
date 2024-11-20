@@ -23,6 +23,23 @@ void SaveGridImage(RenderTexture2D ImageTexture) {
     UnloadImage(gridImage);
 }
 
+// Load Function
+void LoadGridImage(const char* filename, Cell grid[GRID_WIDTH][GRID_HEIGHT]) {
+    Image gridImage = LoadImage(filename);
+
+    // Resize image to match grid dimensions if necessary
+    ImageResize(&gridImage, GRID_WIDTH * CELL_SIZE, GRID_HEIGHT * CELL_SIZE);
+
+    // Iterate through the resized image and update grid colors
+    for (int x = 0; x < GRID_WIDTH; x++) {
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+            Color pixelColor = GetImageColor(gridImage, x * CELL_SIZE, y * CELL_SIZE);
+            grid[x][y].color = pixelColor;
+        }
+    }
+
+    UnloadImage(gridImage);
+}
 
 int main(void)
 {
@@ -113,6 +130,9 @@ int main(void)
            
             SaveGridImage(ImageTexture);
         }
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyReleased(KEY_L)) {
+            LoadGridImage("pixel_grid_image.png",grid);
+        }
         
         //Drawing Mechanic
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -149,6 +169,7 @@ int main(void)
             Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
             Rectangle SelectionButton = { 850,screenHeight - 150,100,40 };
             Rectangle RectangleButton = { 600,screenHeight - 100,100,40 };
+            Rectangle LoadButton = { 700,screenHeight - 50,100,40 };
 
             
 
@@ -168,6 +189,9 @@ int main(void)
             }
             if (CheckCollisionPointRec(mousePosition, RectangleButton)) {
                 Action = 4;
+            }
+            if (CheckCollisionPointRec(mousePosition, LoadButton)) {
+                LoadGridImage("pixel_grid_image.png", grid);
             }
             
 
@@ -289,6 +313,7 @@ int main(void)
         Rectangle SaveButton = { 825,screenHeight - 50,100,40 };
         Rectangle SelectionButton = { 850,screenHeight - 150,100,40 };
         Rectangle RectangleButton = { 600,screenHeight - 100,100,40 };
+        Rectangle LoadButton = { 700,screenHeight - 50,100,40 };
 
         //buttons Colors
         DrawRectangleRec(drawButton, (Action == 1) ? DARKGRAY : GREEN);
@@ -296,6 +321,8 @@ int main(void)
         DrawRectangleRec(SelectionButton, (Action == 3) ? DARKGRAY : GREEN);
         DrawRectangleRec(RectangleButton, (Action == 4) ? DARKGRAY : GREEN);
         DrawRectangleRec(SaveButton, BLUE);
+        DrawRectangleRec(LoadButton, BLUE);
+
        
         //drawing the text 
         DrawText("Draw", drawButton.x + 20, drawButton.y + 10, 20, BLACK);
@@ -303,6 +330,7 @@ int main(void)
         DrawText("Save", SaveButton.x + 20, SaveButton.y + 10, 20, BLACK);
         DrawText("Selection", SelectionButton.x + 5, SelectionButton.y + 10, 20, BLACK);
         DrawText("Rectangle", RectangleButton.x + 10, RectangleButton.y + 10, 15, BLACK);
+        DrawText("Load", LoadButton.x + 20, LoadButton.y + 10, 20, BLACK);
 
         //Drawing Selecting
         if (Action == 3 && Selecting) {
@@ -339,6 +367,23 @@ int main(void)
 
             if (result >= 0) showMessageBox = false;
         }
+
+        //UI 
+        if (Action == 1) {
+            DrawText("Action: DRAW", 400, screenHeight - 180, 20, WHITE);
+        }
+        if (Action == 2) {
+            DrawText("Action: ERASE", 400, screenHeight - 180, 20, WHITE);
+        }
+        if (Action == 3) {
+            DrawText("Action: SELECTION", 400, screenHeight - 180, 20, WHITE);
+        }
+        if (Action == 4) {
+            DrawText("Action: RECTANGLE", 400, screenHeight - 180, 20, WHITE);
+        }
+
+        DrawRectangle(450, screenHeight - 50, 40, 40, CurrentColor);
+        DrawText("Active Color", 425, screenHeight - 100, 20, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
